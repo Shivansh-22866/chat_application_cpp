@@ -16,3 +16,13 @@ sockaddr_in* createIPv4Address(char *ip, int port) {
         inet_pton(AF_INET, ip, &address->sin_addr.s_addr);
     return address;
 }
+
+AcceptedSocket* acceptIncomingConnection(int serverSocketFD) {
+    struct sockaddr_in clientAddress;
+    socklen_t clientAddressLen = sizeof(struct sockaddr_in);
+    int clientSocketFD = accept(serverSocketFD, reinterpret_cast<struct sockaddr*>(&clientAddress), &clientAddressLen);
+
+    AcceptedSocket* acceptedSocket = new AcceptedSocket(clientSocketFD, clientAddress);
+
+    return acceptedSocket;
+}

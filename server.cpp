@@ -1,5 +1,26 @@
 #include "SocketUtil.cpp"
 
+void receiveAndDisplay(AcceptedSocket* clientSocket) {
+        char buffer[1024];
+
+    while(true) {
+        ssize_t amountReceived = recv(clientSocket->acceptedSocketFD, buffer, 1024, 0);
+
+        if(amountReceived>0) {
+            buffer[amountReceived] = 0;
+            std::cout<<"Response received: "<<std::endl;
+            std::cout<<buffer<<std::endl;
+        }
+
+        if(amountReceived==0) {
+            std::cerr << "recv failed: " << strerror(errno) << std::endl;
+            break;
+        }
+    }
+}
+
+
+
 int main() {
 
     int serverSocketFD = createTCPIpv4Socket();
@@ -24,15 +45,13 @@ int main() {
 
     int listenResult = listen(serverSocketFD, 10);
 
-    struct sockaddr_in clientAddress;
-    socklen_t clientAddressLen = sizeof(struct sockaddr_in);
-    int clientSocketFD = accept(serverSocketFD, reinterpret_cast<struct sockaddr*>(&clientAddress), &clientAddressLen);
+    AcceptedSocket* clientSocket = acceptIncomingConnection(serverSocketFD);
 
-    char buffer[1024];
-    recv(clientSocketFD, buffer, 1024, 0);
+    receiveAndDisplay(clientSocket);
 
-    std::cout<<"Response received: "<<std::endl;
-    std::cout<<buffer<<std::endl;
+    close(clientSocket->acceptedSocketFD);
+    shutdown(serverSocketFD, SHUT_RDWR);
 
     return 0;
 }
+

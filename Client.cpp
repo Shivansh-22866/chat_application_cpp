@@ -16,15 +16,22 @@ int main() {
     else if(res < 0) {
         cout<<"Unsuccessful Connection"<<endl;
     }
-    
 
-    char* message;
-    message = (char *)"GET \\ HTTP/1.1\r\nHost:google.com\r\n\r\n";
-    send(socketFD, message, strlen(message), 0);
+    char* line = NULL;
+    size_t len = 0;
+    cout<<"Write some message to send\n"<<endl;
 
-    char buffer[1024];
-    recv(socketFD, buffer, 1024, 0);
-    cout<<"The message was: \n"<<buffer<<endl;
+    while(true) {
+        ssize_t charCount =  getline(&line, &len, stdin);
+        if(charCount > 0) {
+            if(line == "exit\n") {
+                break;
+            }
+            ssize_t amountSent = send(socketFD, line, charCount, 0);
+        }
+    }
+
+    close(socketFD);
 
     return 0;
 }
