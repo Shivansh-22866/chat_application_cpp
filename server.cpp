@@ -1,21 +1,20 @@
 #include "SocketUtil.cpp"
-#include <pthread.h> // Include pthread.h for pthread functions
 
 void* receiveAndDisplay(void* arg) {
-    int socketFD = *((int*)arg); // Cast the argument back to int and dereference it
+    int socketFD = *((int*)arg);
 
     char buffer[1024];
     while (true) {
         ssize_t amountReceived = recv(socketFD, buffer, 1024, 0);
 
         if (amountReceived > 0) {
-            buffer[amountReceived] = '\0'; // Null-terminate the received data
-            std::cout << "Response received: " << std::endl;
-            std::cout << buffer << std::endl;
+            buffer[amountReceived] = '\0';
+            cout << "Response received: " << endl;
+            cout << buffer << std::endl;
         }
 
         if (amountReceived <= 0) {
-            std::cerr << "recv failed: " << strerror(errno) << std::endl;
+            cerr << "recv failed: " << strerror(errno) << endl;
             break;
         }
     }
@@ -25,7 +24,7 @@ void* receiveAndDisplay(void* arg) {
 }
 
 void* startAcceptingNewIncomingConnection(void* arg) {
-    int serverSocketFD = *((int*)arg); // Cast the argument back to int and dereference it
+    int serverSocketFD = *((int*)arg);
 
     while (true) {
         AcceptedSocket* clientSocket = acceptIncomingConnection(serverSocketFD);
@@ -63,9 +62,6 @@ int main() {
     pthread_t acceptThread;
     pthread_create(&acceptThread, NULL, startAcceptingNewIncomingConnection, &serverSocketFD);
 
-    // Main thread can do other tasks here while accepting connections in a separate thread
-
-    // Join the accept thread to wait for it to finish
     pthread_join(acceptThread, NULL);
 
     shutdown(serverSocketFD, SHUT_RDWR);
