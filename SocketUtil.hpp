@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <unistd.h>
+#include <pthread.h>
 
 using namespace std;
 
