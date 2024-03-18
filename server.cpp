@@ -15,9 +15,9 @@ void parseAndBroadcastMessage(char* buffer, int socketFD) {
     char* username = strtok(buffer, ":");
     char* message = strtok(NULL, "");
 
-    std::string formattedMessage = std::string(username) + ": " + std::string(message);
-    std::vector<char> mutableMessage(formattedMessage.begin(), formattedMessage.end());
-    mutableMessage.push_back('\0'); // Add null terminator
+    string formattedMessage = string(username) + ": " + string(message);
+    vector<char> mutableMessage(formattedMessage.begin(), formattedMessage.end());
+    mutableMessage.push_back('\0');
     broadcastReceivedMessage(mutableMessage.data(), socketFD);
 }
 
@@ -74,11 +74,11 @@ int main() {
     int res = bind(serverSocketFD, reinterpret_cast<struct sockaddr*>(serverAddress), sizeof(*serverAddress));
 
     if (res == 0) {
-        std::cout << "Server is listening on port 7000" << std::endl;
+        cout << "Server is listening on port 7000" << endl;
     }
 
     if (res == -1) {
-        std::cerr << "Bind failed: " << strerror(errno) << std::endl;
+        cerr << "Bind failed: " << strerror(errno) << endl;
         return 1;
     }
 

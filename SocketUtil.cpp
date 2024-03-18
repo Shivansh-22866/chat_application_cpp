@@ -26,3 +26,32 @@ AcceptedSocket* acceptIncomingConnection(int serverSocketFD) {
 
     return acceptedSocket;
 }
+
+void* listenAndDisplay(void *arg) {
+    int* socketFDPtr = (int*)arg;
+    int socketFD = *socketFDPtr;
+    char buffer[1024];
+
+    while (true) {
+        ssize_t amountReceived = recv(socketFD, buffer, 1024, 0);
+
+        if (amountReceived > 0) {
+            buffer[amountReceived] = '\0';
+            cout << buffer << endl;
+        }
+
+        if (amountReceived <= 0) {
+            cerr << "recv failed: " << strerror(errno) << endl;
+            break;
+        }
+    }
+
+    close(socketFD);
+    return NULL;
+}
+
+void startListeningAndDisplay(int socketFD) {
+    int* socketFDPtr = new int(socketFD);
+    pthread_t id;
+    pthread_create(&id, NULL, listenAndDisplay, (void*)socketFDPtr);
+}

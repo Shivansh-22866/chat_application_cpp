@@ -37,8 +37,12 @@ class AcceptedSocket {
 
 int createTCPIpv4Socket();
 
-struct sockaddr_in* createIPv4Address(char* ip, int port);
+struct sockaddr_in* createIPv4Address(char* , int);
 
-AcceptedSocket* acceptIncomingConnection(int serverSocketFD);
+AcceptedSocket* acceptIncomingConnection(int);
+
+void* listenAndDisplay(void *arg);
+
+void startListeningAndDisplay(int );
 
 #endif
