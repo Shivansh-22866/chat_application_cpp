@@ -1,5 +1,17 @@
 #include "SocketUtil.cpp"
 
+AcceptedSocket acceptedSockets[10];
+int acceptedSocketCount = 0;
+
+void broadcastReceivedMessage(char* buffer, int socketFD) {
+    for(int i=0;i<acceptedSocketCount;i++) {
+        if(acceptedSockets[i].acceptedSocketFD != socketFD) {
+            send(acceptedSockets[i].acceptedSocketFD, buffer, strlen(buffer), 0);
+        }
+    }
+}
+
+
 void* receiveAndDisplay(void* arg) {
     int socketFD = *((int*)arg);
 
@@ -10,7 +22,9 @@ void* receiveAndDisplay(void* arg) {
         if (amountReceived > 0) {
             buffer[amountReceived] = '\0';
             cout << "Response received: " << endl;
-            cout << buffer << std::endl;
+            cout << buffer << endl;
+
+            broadcastReceivedMessage(buffer, socketFD);
         }
 
         if (amountReceived <= 0) {
@@ -28,6 +42,7 @@ void* startAcceptingNewIncomingConnection(void* arg) {
 
     while (true) {
         AcceptedSocket* clientSocket = acceptIncomingConnection(serverSocketFD);
+        acceptedSockets[acceptedSocketCount++] = *clientSocket;
         if (clientSocket != nullptr) {
             int* clientSocketFDPtr = new int(clientSocket->acceptedSocketFD);
             pthread_t displayThread;
