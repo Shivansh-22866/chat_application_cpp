@@ -4,13 +4,22 @@ AcceptedSocket acceptedSockets[10];
 int acceptedSocketCount = 0;
 
 void broadcastReceivedMessage(char* buffer, int socketFD) {
-    for(int i=0;i<acceptedSocketCount;i++) {
-        if(acceptedSockets[i].acceptedSocketFD != socketFD) {
+    for (int i = 0; i < acceptedSocketCount; i++) {
+        if (acceptedSockets[i].acceptedSocketFD != socketFD) {
             send(acceptedSockets[i].acceptedSocketFD, buffer, strlen(buffer), 0);
         }
     }
 }
 
+void parseAndBroadcastMessage(char* buffer, int socketFD) {
+    char* username = strtok(buffer, ":");
+    char* message = strtok(NULL, "");
+
+    std::string formattedMessage = std::string(username) + ": " + std::string(message);
+    std::vector<char> mutableMessage(formattedMessage.begin(), formattedMessage.end());
+    mutableMessage.push_back('\0'); // Add null terminator
+    broadcastReceivedMessage(mutableMessage.data(), socketFD);
+}
 
 void* receiveAndDisplay(void* arg) {
     int socketFD = *((int*)arg);
@@ -24,7 +33,7 @@ void* receiveAndDisplay(void* arg) {
             cout << "Response received: " << endl;
             cout << buffer << endl;
 
-            broadcastReceivedMessage(buffer, socketFD);
+            parseAndBroadcastMessage(buffer, socketFD);
         }
 
         if (amountReceived <= 0) {
@@ -36,6 +45,7 @@ void* receiveAndDisplay(void* arg) {
     close(socketFD);
     return NULL;
 }
+
 
 void* startAcceptingNewIncomingConnection(void* arg) {
     int serverSocketFD = *((int*)arg);

@@ -10,7 +10,6 @@ void* listenAndDisplay(void *arg) {
 
         if (amountReceived > 0) {
             buffer[amountReceived] = '\0';
-            std::cout << "Response received: " << std::endl;
             std::cout << buffer << std::endl;
         }
 
@@ -37,18 +36,24 @@ int main() {
     struct sockaddr_in* address = createIPv4Address(ip, 7000);
 
     int res = connect(socketFD, reinterpret_cast<struct sockaddr*>(address), sizeof(*address));
-    if(res == 0) {
+    if (res == 0) {
         std::cout << "Successful Connection!!" << std::endl;
     } else {
         std::cout << "Unsuccessful Connection" << std::endl;
         return 1;
     }
 
+    // Prompt user for username
+    std::cout << "Enter your username: ";
+    char username[1024];
+    std::cin.getline(username, 1024);
+
+    // Start listening thread
+    startListeningAndDisplay(socketFD);
+
     char* line = NULL;
     size_t len = 0;
     std::cout << "Write some message to send" << std::endl;
-
-    startListeningAndDisplay(socketFD);
 
     while(true) {
         ssize_t charCount = getline(&line, &len, stdin);
@@ -56,7 +61,9 @@ int main() {
             if(strcmp(line, "exit\n") == 0) {
                 break;
             }
-            ssize_t amountSent = send(socketFD, line, charCount, 0);
+            // Concatenate username and message
+            std::string messageToSend = std::string(username) + ": " + std::string(line);
+            ssize_t amountSent = send(socketFD, messageToSend.c_str(), messageToSend.length(), 0);
         }
     }
 
